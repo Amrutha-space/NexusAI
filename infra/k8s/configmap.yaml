@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexusai-config
+  namespace: nexusai-gateway
+data:
+  NODE_ENV: production
+  FRONTEND_ALLOWED_ORIGIN: http://nexusai.local
+  AUTH_SERVICE_URL: http://auth-service:4001
+  RATE_LIMITER_SERVICE_URL: http://rate-limiter-service:4002
+  LOGGING_SERVICE_URL: http://logging-service:4003
+  REDIS_HOST: redis
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: developer_platform
+  POSTGRES_USER: platform
+  DEFAULT_ALERT_ERROR_RATE: "0.15"

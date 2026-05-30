@@ -1,0 +1,68 @@
+{
+  "title": "NexusAI Gateway Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["nexusai", "api-gateway", "portfolio"],
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP Requests by Service",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (service) (rate(platform_http_requests_total[1m]))",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p95 by Service",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, service) (rate(platform_http_request_duration_ms_bucket[5m])))",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "5xx Rate",
+      "gridPos": { "x": 0, "y": 8, "w": 8, "h": 5 },
+      "targets": [
+        {
+          "expr": "sum(rate(platform_http_requests_total{status_code=~\"5..\"}[5m]))",
+          "legendFormat": "5xx/s"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Gateway Throughput",
+      "gridPos": { "x": 8, "y": 8, "w": 8, "h": 5 },
+      "targets": [
+        {
+          "expr": "sum(rate(platform_http_requests_total{service=\"gateway-service\"}[1m]))",
+          "legendFormat": "gateway rps"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Rate Limit Decisions",
+      "gridPos": { "x": 16, "y": 8, "w": 8, "h": 5 },
+      "targets": [
+        {
+          "expr": "sum(rate(platform_http_requests_total{service=\"rate-limiter-service\"}[1m]))",
+          "legendFormat": "decisions/s"
+        }
+      ]
+    }
+  ]
+}

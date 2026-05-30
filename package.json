@@ -1,0 +1,40 @@
+{
+  "name": "developer-api-management-platform",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared-libs",
+    "auth-service",
+    "gateway-service",
+    "rate-limiter-service",
+    "logging-service",
+    "frontend-dashboard",
+    "mock-upstream-service"
+  ],
+  "scripts": {
+    "test": "JWT_SECRET=test-secret-value-12345 INTERNAL_SERVICE_TOKEN=test-internal-token node --test tests/unit/*.test.js",
+    "lint": "npm run lint --workspaces --if-present",
+    "seed": "node scripts/seed.js",
+    "migrate": "node scripts/migrate.js",
+    "docker:seed": "docker compose exec auth-service sh -lc 'cd /app && npm run seed'",
+    "docker:migrate": "docker compose exec auth-service sh -lc 'cd /app && npm run migrate'",
+    "verify:imports": "JWT_SECRET=test-secret-value-12345 INTERNAL_SERVICE_TOKEN=test-internal-token REDIS_HOST=127.0.0.1 POSTGRES_HOST=127.0.0.1 node -e \"Promise.all([import('./auth-service/src/app.js'), import('./gateway-service/src/app.js'), import('./rate-limiter-service/src/app.js'), import('./logging-service/src/app.js')]).then(() => console.log('backend-imports-ok'))\"",
+    "test:integration": "RUN_LIVE_STACK=1 node --test tests/integration/*.mjs",
+    "test:smoke": "node tests/smoke/endToEnd.smoke.mjs",
+    "report:load": "node scripts/load-report.js",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down -v"
+  },
+  "overrides": {
+    "vite": "7.1.7",
+    "@vitejs/plugin-react": "4.7.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "pg": "^8.12.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

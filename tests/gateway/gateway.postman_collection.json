@@ -1,0 +1,51 @@
+{
+  "info": {
+    "name": "Developer API Platform",
+    "_postman_id": "7dd4506b-3974-43fe-97a1-88b44ef7b107",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "http://localhost:4001/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4001",
+          "path": ["auth", "login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"owner@example.com\",\"password\":\"PlatformPass123!\"}"
+        }
+      }
+    },
+    {
+      "name": "Proxy Payments Charge",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "ak_live_seed_platform_key" }
+        ],
+        "url": {
+          "raw": "http://localhost:4000/proxy/payments/payments/charge",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "4000",
+          "path": ["proxy", "payments", "payments", "charge"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"amount\":299,\"currency\":\"USD\"}"
+        }
+      }
+    }
+  ]
+}
+

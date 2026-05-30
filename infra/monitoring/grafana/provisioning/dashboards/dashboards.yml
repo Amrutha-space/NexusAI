@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: NexusAI Gateway
+    orgId: 1
+    folder: NexusAI Gateway
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 20
+    options:
+      path: /var/lib/grafana/dashboards

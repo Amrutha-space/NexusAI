@@ -1,0 +1,18 @@
+{
+  "name": "@platform/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
+    "pg": "^8.12.0",
+    "pino": "^9.4.0",
+    "prom-client": "^15.1.3",
+    "zod": "^3.23.8"
+  }
+}
+

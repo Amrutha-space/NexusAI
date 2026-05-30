@@ -1,0 +1,19 @@
+{
+  "name": "@platform/logging-service",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@platform/shared": "1.0.0",
+    "bullmq": "^5.16.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "ws": "^8.18.0"
+  }
+}
+

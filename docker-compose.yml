@@ -1,0 +1,145 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-platform}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-platform}
+      POSTGRES_DB: ${POSTGRES_DB:-developer_platform}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-platform} -d ${POSTGRES_DB:-developer_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    env_file: .env
+    ports:
+      - "4001:4001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  rate-limiter-service:
+    build:
+      context: .
+      dockerfile: rate-limiter-service/Dockerfile
+    env_file: .env
+    ports:
+      - "4002:4002"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  logging-service:
+    build:
+      context: .
+      dockerfile: logging-service/Dockerfile
+    env_file: .env
+    ports:
+      - "4003:4003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    env_file: .env
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      rate-limiter-service:
+        condition: service_started
+      logging-service:
+        condition: service_started
+      mock-upstream-service:
+        condition: service_started
+
+  mock-upstream-service:
+    build:
+      context: .
+      dockerfile: mock-upstream-service/Dockerfile
+    ports:
+      - "4010:4010"
+
+  frontend-dashboard:
+    build:
+      context: .
+      dockerfile: frontend-dashboard/Dockerfile
+    env_file: .env
+    ports:
+      - "5173:5173"
+    depends_on:
+      gateway-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      logging-service:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: ["monitoring"]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      gateway-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      rate-limiter-service:
+        condition: service_started
+      logging-service:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:11.3.1
+    profiles: ["monitoring"]
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  redis-data:

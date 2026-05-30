@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.DS_Store
+coverage
+npm-debug.log
+Dockerfile*
+**/node_modules
+**/dist
