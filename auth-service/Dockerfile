@@ -12,4 +12,4 @@ RUN npm install
 COPY . .
 WORKDIR /app/auth-service
 EXPOSE 4001
-CMD ["npm", "start"]
+CMD sh -c "npm run migrate && npm start"
