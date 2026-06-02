@@ -43,6 +43,11 @@ const normalizedBody =
       : typeof body === "object"
         ? JSON.stringify(body)
         : body;
+        
+console.log("FORWARDED URL:", forwardedUrl.toString());
+console.log("METHOD:", method);
+console.log("BODY:", normalizedBody);
+
 
 const response = await fetch(forwardedUrl, {
   method,
