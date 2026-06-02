@@ -34,12 +34,24 @@ export class UpstreamClient {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), api.timeout_ms);
       try {
-        const response = await fetch(forwardedUrl, {
-          method,
-          headers: filteredHeaders,
-          body: ["GET", "HEAD"].includes(method) ? undefined : body,
-          signal: controller.signal
-        });
+      
+const normalizedBody =
+  ["GET", "HEAD"].includes(method)
+    ? undefined
+    : Buffer.isBuffer(body)
+      ? body.toString()
+      : typeof body === "object"
+        ? JSON.stringify(body)
+        : body;
+
+const response = await fetch(forwardedUrl, {
+  method,
+  headers: filteredHeaders,
+  body: normalizedBody,
+  signal: controller.signal
+});
+
+
 
         clearTimeout(timeout);
 
