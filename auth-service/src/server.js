@@ -18,13 +18,14 @@ const readinessHandler = createReadinessHandler("auth-service", [
 
 const app = buildApp({ readinessHandler });
 const logger = createLogger("auth-service");
+const port = env.PORT || env.AUTH_PORT;
 
 async function start() {
   await getPgPool().query("SELECT 1");
   await getRedisClient().ping();
 
-  app.listen(env.AUTH_PORT, () => {
-    logger.info({ port: env.AUTH_PORT }, "auth-service listening");
+  app.listen(port, () => {
+    logger.info({ port }, "auth-service listening");
   });
 }
 

@@ -17,6 +17,7 @@ router.all("/:slug/*", express.raw({ type: "*/*", limit: "2mb" }), async (req, r
       path: wildcardPath,
       method: req.method,
       headers: req.headers,
+      traceparent: req.trace?.traceparent,
       queryString: new URLSearchParams(req.query).toString(),
       body: req.body,
       apiKey

@@ -7,13 +7,23 @@ let pgPool;
 
 export function getRedisClient() {
   if (!redisClient) {
-    redisClient = new Redis({
-      host: env.REDIS_HOST,
-      port: env.REDIS_PORT,
-      maxRetriesPerRequest: null,
+    const options = {
+      maxRetriesPerRequest: 2,
       enableReadyCheck: true,
-      lazyConnect: true
-    });
+      lazyConnect: true,
+      connectTimeout: 5000
+    };
+
+    if (env.REDIS_URL) {
+      redisClient = new Redis(env.REDIS_URL, options);
+    } else {
+      redisClient = new Redis({
+        ...options,
+        host: env.REDIS_HOST,
+        port: env.REDIS_PORT,
+        tls: env.REDIS_TLS ? {} : undefined
+      });
+    }
   }
 
   return redisClient;
@@ -21,12 +31,23 @@ export function getRedisClient() {
 
 export function getPgPool() {
   if (!pgPool) {
+    const useSsl = env.POSTGRES_SSL || env.DATABASE_SSL || env.PGSSLMODE === "require";
+    const poolOptions = env.DATABASE_URL
+      ? {
+          connectionString: env.DATABASE_URL,
+          ssl: useSsl ? { rejectUnauthorized: false } : undefined
+        }
+      : {
+          host: env.POSTGRES_HOST,
+          port: env.POSTGRES_PORT,
+          user: env.POSTGRES_USER,
+          password: env.POSTGRES_PASSWORD,
+          database: env.POSTGRES_DB,
+          ssl: useSsl ? { rejectUnauthorized: false } : undefined
+        };
+
     pgPool = new Pool({
-      host: env.POSTGRES_HOST,
-      port: env.POSTGRES_PORT,
-      user: env.POSTGRES_USER,
-      password: env.POSTGRES_PASSWORD,
-      database: env.POSTGRES_DB,
+      ...poolOptions,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000

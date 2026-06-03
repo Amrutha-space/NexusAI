@@ -11,7 +11,7 @@ export class UpstreamClient {
     this.circuitBreakerRegistry = circuitBreakerRegistry;
   }
 
-  async execute({ api, path, method, headers, queryString, body }) {
+  async execute({ api, path, method, headers, traceparent, queryString, body }) {
     this.circuitBreakerRegistry.assertCanProceed(api.slug, api.circuit_breaker_threshold);
 
     const cacheKey = `gateway:cache:${api.slug}:${method}:${path}:${queryString}`;
@@ -26,7 +26,8 @@ export class UpstreamClient {
     const upstreamUrl = new URL(api.upstream_url);
     const forwardedUrl = new URL(path + (queryString ? `?${queryString}` : ""), upstreamUrl);
     const filteredHeaders = {
-      "content-type": headers["content-type"] || "application/json"
+      "content-type": headers["content-type"] || "application/json",
+      ...(traceparent ? { traceparent } : {})
     };
 
     let lastError;
@@ -34,7 +35,6 @@ export class UpstreamClient {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), api.timeout_ms);
       try {
-      
 const normalizedBody =
   ["GET", "HEAD"].includes(method)
     ? undefined
@@ -43,11 +43,6 @@ const normalizedBody =
       : typeof body === "object"
         ? JSON.stringify(body)
         : body;
-        
-console.log("FORWARDED URL:", forwardedUrl.toString());
-console.log("METHOD:", method);
-console.log("BODY:", normalizedBody);
-
 
 const response = await fetch(forwardedUrl, {
   method,
@@ -107,4 +102,3 @@ const response = await fetch(forwardedUrl, {
     return result;
   }
 }
-

@@ -18,12 +18,13 @@ const readinessHandler = createReadinessHandler("gateway-service", [
 
 const app = buildApp({ readinessHandler });
 const logger = createLogger("gateway-service");
+const port = env.PORT || env.GATEWAY_PORT;
 
 async function start() {
   await getPgPool().query("SELECT 1");
   await getRedisClient().ping();
-  app.listen(env.GATEWAY_PORT, () => {
-    logger.info({ port: env.GATEWAY_PORT }, "gateway-service listening");
+  app.listen(port, () => {
+    logger.info({ port }, "gateway-service listening");
   });
 }
 

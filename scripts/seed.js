@@ -18,6 +18,7 @@ const seedUser = {
   password: "PlatformPass123!",
   apiKeySecret: "ak_live_seed_platform_key"
 };
+const seedUpstreamUrl = process.env.SEED_UPSTREAM_URL || "http://mock-upstream-service:4010";
 
 async function run() {
   const passwordHash = await bcrypt.hash(seedUser.password, 12);
@@ -55,10 +56,12 @@ async function run() {
       id, organization_id, name, slug, upstream_url, description,
       cache_ttl_seconds, retry_count, timeout_ms, circuit_breaker_threshold
     )
-    VALUES ($1, $2, 'Payments API', 'payments', 'http://mock-upstream-service:4010', 'Seed upstream API', 15, 2, 5000, 5)
-    ON CONFLICT (slug) DO NOTHING
+    VALUES ($1, $2, 'Payments API', 'payments', $3, 'Seed upstream API', 15, 2, 5000, 5)
+    ON CONFLICT (slug) DO UPDATE SET
+      upstream_url = EXCLUDED.upstream_url,
+      updated_at = NOW()
     `,
-    [seedUser.apiId, seedUser.organizationId]
+    [seedUser.apiId, seedUser.organizationId, seedUpstreamUrl]
   );
 
   await pool.query(
@@ -88,4 +91,3 @@ run()
   .finally(async () => {
     await pool.end();
   });
-

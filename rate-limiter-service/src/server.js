@@ -12,11 +12,12 @@ const readinessHandler = createReadinessHandler("rate-limiter-service", [
 
 const app = buildApp({ readinessHandler });
 const logger = createLogger("rate-limiter-service");
+const port = env.PORT || env.RATE_LIMITER_PORT;
 
 async function start() {
   await getRedisClient().ping();
-  app.listen(env.RATE_LIMITER_PORT, () => {
-    logger.info({ port: env.RATE_LIMITER_PORT }, "rate-limiter-service listening");
+  app.listen(port, () => {
+    logger.info({ port }, "rate-limiter-service listening");
   });
 }
 

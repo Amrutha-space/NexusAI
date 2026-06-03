@@ -25,14 +25,15 @@ const readinessHandler = createReadinessHandler("logging-service", [
 const app = buildApp(logProcessor, { readinessHandler });
 const server = http.createServer(app);
 const wsServer = new WebSocketServer({ server, path: "/ws" });
+const port = env.PORT || env.LOGGING_PORT;
 
 websocketHub.attach(wsServer);
 
 async function start() {
   await getPgPool().query("SELECT 1");
   await getRedisClient().ping();
-  server.listen(env.LOGGING_PORT, () => {
-    logger.info({ port: env.LOGGING_PORT }, "logging-service listening");
+  server.listen(port, () => {
+    logger.info({ port }, "logging-service listening");
   });
 }
 

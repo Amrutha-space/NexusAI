@@ -5,6 +5,7 @@ import {
   apiSchema,
   env,
   generateApiKey,
+  fetchWithTimeout,
   getBaseHeaders,
   hashApiKey,
   parseJsonResponse
@@ -143,22 +144,40 @@ export class GatewayService {
   }
 
   async enforceRateLimit(apiKey) {
-    const response = await fetch(`${env.RATE_LIMITER_SERVICE_URL}/internal/rate-limits/evaluate`, {
-      method: "POST",
-      headers: getBaseHeaders({
-        "x-internal-token": env.INTERNAL_SERVICE_TOKEN
-      }),
-      body: JSON.stringify({
-        identifier: apiKey.id,
-        strategy: apiKey.rate_limit_strategy || RATE_LIMIT_STRATEGIES.TOKEN_BUCKET,
-        requestsPerMinute: apiKey.requests_per_minute,
-        burstCapacity: apiKey.burst_capacity,
-        windowSizeSeconds: apiKey.window_size_seconds
-      })
-    });
+    const url = `${env.RATE_LIMITER_SERVICE_URL}/internal/rate-limits/evaluate`;
+    let response;
+
+    try {
+      response = await fetchWithTimeout(
+        url,
+        {
+          method: "POST",
+          headers: getBaseHeaders({
+            "x-internal-token": env.INTERNAL_SERVICE_TOKEN
+          }),
+          body: JSON.stringify({
+            identifier: apiKey.id,
+            strategy: apiKey.rate_limit_strategy || RATE_LIMIT_STRATEGIES.TOKEN_BUCKET,
+            requestsPerMinute: apiKey.requests_per_minute,
+            burstCapacity: apiKey.burst_capacity,
+            windowSizeSeconds: apiKey.window_size_seconds
+          })
+        },
+        5000
+      );
+    } catch (error) {
+      throw new AppError("Rate limiter unavailable", 503, {
+        url,
+        reason: error.name === "AbortError" ? "request timed out" : error.message
+      });
+    }
 
     if (!response.ok) {
-      throw new AppError("Rate limiter unavailable", 503);
+      throw new AppError("Rate limiter unavailable", 503, {
+        url,
+        statusCode: response.status,
+        response: await parseJsonResponse(response)
+      });
     }
 
     return parseJsonResponse(response);
