@@ -127,4 +127,4 @@ npm run dev
 ## Author
 
 **Amrutha A**  
-Backend Engineering • Distributed Systems • Platform Engineering
+Backend Engineering • Distributed Systems • Platform Engineering • Software Developer
