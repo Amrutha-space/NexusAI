@@ -11,9 +11,9 @@ import {
   YAxis
 } from "recharts";
 
-const gatewayUrl = import.meta.env.VITE_GATEWAY_URL || "http://localhost:4000";
-const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:4001";
-const loggingUrl = import.meta.env.VITE_LOGGING_URL || "http://localhost:4003";
+const gatewayUrl = import.meta.env.VITE_GATEWAY_URL || "https://gateway-service-c4g1.onrender.com";
+const authUrl = import.meta.env.VITE_AUTH_URL || "https://auth-service-pyjf.onrender.com";
+const loggingUrl = import.meta.env.VITE_LOGGING_URL || "https://logging-service-9k02.onrender.com";
 const featureHighlights = [
   { title: "AI abuse detection", detail: "Score traffic spikes, errors, and latency drift from gateway telemetry." },
   { title: "Cloud-native control", detail: "Manage APIs, keys, limits, retries, and circuit breakers from one place." },
