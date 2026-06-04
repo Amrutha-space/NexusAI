@@ -117,7 +117,7 @@ function Footer() {
       </div>
       <div className="footer-meta">
         <span>NexusAI Gateway</span>
-        <span>Built for AI-powered API operations</span>
+        <span>Built for ENGINEERS to API it</span>
       </div>
     </footer>
   );
